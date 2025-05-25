@@ -11,24 +11,6 @@
       "use": "@vercel/static"
     }
   ],
-  "routes": [
-    {
-      "src": "/",
-      "dest": "/painel-desktop.html"
-    },
-    {
-      "src": "/painel",
-      "dest": "/painel-desktop.html"
-    },
-    {
-      "src": "/desktop",
-      "dest": "/painel-desktop.html"
-    },
-    {
-      "src": "/control",
-      "dest": "/painel-desktop.html"
-    }
-  ],
   "headers": [
     {
       "source": "**/*.html",
@@ -66,6 +48,22 @@
     }
   ],
   "rewrites": [
+    {
+      "source": "/",
+      "destination": "/painel-desktop.html"
+    },
+    {
+      "source": "/painel",
+      "destination": "/painel-desktop.html"
+    },
+    {
+      "source": "/desktop",
+      "destination": "/painel-desktop.html"
+    },
+    {
+      "source": "/control",
+      "destination": "/painel-desktop.html"
+    },
     {
       "source": "/api/(.*)",
       "destination": "/painel-desktop.html"
