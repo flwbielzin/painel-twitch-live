@@ -450,15 +450,19 @@
                         <input type="text" id="channel-name" placeholder="Carregando..." readonly>
                     </div>
                     <div class="input-group">
-                        <label>📍 Localização Atual</label>
-                        <input type="text" id="location-input" placeholder="Ex: São Paulo, SP">
-                    </div>
-                    <div class="input-group">
                         <label>🔔 Notificações</label>
                         <select id="notifications">
                             <option value="all">Todas</option>
                             <option value="follows">Apenas Follows</option>
                             <option value="none">Nenhuma</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>🔄 Intervalo de Atualização</label>
+                        <select id="update-interval">
+                            <option value="10">10 segundos</option>
+                            <option value="30">30 segundos</option>
+                            <option value="60">1 minuto</option>
                         </select>
                     </div>
                 </div>
@@ -478,14 +482,6 @@
                             <option value="small">Pequeno</option>
                             <option value="medium">Médio</option>
                             <option value="large">Grande</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label>🔄 Intervalo de Atualização</label>
-                        <select id="update-interval">
-                            <option value="10">10 segundos</option>
-                            <option value="30">30 segundos</option>
-                            <option value="60">1 minuto</option>
                         </select>
                     </div>
                 </div>
@@ -535,6 +531,7 @@
     <script src="clipGenerator.js"></script>
     <script>
         // Variáveis globais
+        let twitchAPI; // Declarar a variável da API
         let updateInterval;
         let streamStartTime = null;
         let peakViewers = 0;
@@ -582,12 +579,59 @@
             // Carregar configurações salvas
             carregarConfiguracoes();
             
-            // Verificar API
-            if (typeof twitchAPI !== 'undefined') {
+            // Inicializar API e carregar dados
+            let apiInicializada = false;
+            if (await initializeTwitchAPI()) {
                 addToLog('✅ API da Twitch carregada', 'success');
-                await testarAPI();
+                apiInicializada = await testarAPI();
             } else {
                 addToLog('❌ API da Twitch não encontrada', 'error');
+            }
+            
+            // Sempre carregar dados (API ou simulados)
+            if (!apiInicializada) {
+                addToLog('🎭 Carregando dados simulados para demonstração', 'info');
+                const dadosSimulados = gerarDadosSimulados();
+                currentData = {
+                    viewers: dadosSimulados.viewer_count,
+                    followers: dadosSimulados.follower_count,
+                    isLive: true,
+                    title: dadosSimulados.title,
+                    category: dadosSimulados.game_name,
+                    quality: 'Simulado',
+                    streamerName: dadosSimulados.display_name
+                };
+                
+                // Atualizar interface com dados simulados
+                atualizarDisplay();
+                
+                // Atualizar títulos da página
+                const pageTitle = document.getElementById('panel-title');
+                const panelHeader = document.getElementById('panel-header');
+                const channelNameInput = document.getElementById('channel-name');
+                const footerText = document.getElementById('footer-text');
+                
+                if (pageTitle) {
+                    pageTitle.textContent = `Painel ${currentData.streamerName} - AO VIVO`;
+                }
+                
+                if (panelHeader) {
+                    panelHeader.textContent = `🎮 Painel de Controle - ${currentData.streamerName}`;
+                }
+                
+                if (channelNameInput) {
+                    channelNameInput.value = dadosSimulados.login;
+                }
+                
+                if (footerText) {
+                    footerText.textContent = `${currentData.streamerName} Stream Control v1.0 - Overlay Mobile para Lives IRL`;
+                }
+                
+                // Simular que a stream começou
+                streamStartTime = new Date(dadosSimulados.started_at);
+                peakViewers = currentData.viewers;
+                totalViewers = currentData.viewers;
+                viewerSamples = 1;
             }
             
             // Inicializar gerador de clips avançado
@@ -597,7 +641,7 @@
                 if (clipInitialized) {
                     addToLog('✅ Gerador de clips ativado com triggers automáticos!', 'success');
                 } else {
-                    addToLog('⚠️ Gerador de clips em modo manual (stream offline)', 'info');
+                    addToLog('⚠️ Gerador de clips em modo manual', 'info');
                 }
                 
                 // Configurar triggers dos auto-clips
@@ -627,20 +671,24 @@
                         statusElement.className = 'status online';
                         addToLog('✅ API conectada com sucesso!', 'success');
                         await atualizarDados();
+                        return true;
                     } else {
                         statusElement.textContent = '🔴 Erro na API';
                         statusElement.className = 'status offline';
                         addToLog('❌ Falha na conexão com API', 'error');
+                        return false;
                     }
                 } else {
                     statusElement.textContent = '🔴 API não encontrada';
                     statusElement.className = 'status offline';
                     addToLog('❌ API da Twitch não carregada', 'error');
+                    return false;
                 }
             } catch (error) {
                 statusElement.textContent = '🔴 Erro';
                 statusElement.className = 'status offline';
                 addToLog(`❌ Erro no teste: ${error.message}`, 'error');
+                return false;
             }
         }
 
@@ -648,97 +696,149 @@
             try {
                 addToLog('🔄 Atualizando dados...', 'info');
                 
+                let channelInfo = null;
+                
+                // Tentar obter dados da API
                 if (typeof twitchAPI !== 'undefined') {
-                    const channelInfo = await twitchAPI.getChannelInfo();
-                    
-                    if (channelInfo) {
-                        // Atualizar dados atuais
-                        const wasLive = currentData.isLive;
-                        currentData = {
-                            viewers: channelInfo.viewer_count || 0,
-                            followers: channelInfo.follower_count || 0,
-                            isLive: channelInfo.is_live || false,
-                            title: channelInfo.title || 'Sem título',
-                            category: channelInfo.game_name || 'Sem categoria',
-                            quality: channelInfo.is_live ? 'Ao vivo' : 'Offline',
-                            streamerName: channelInfo.display_name || channelInfo.login || 'Streamer'
-                        };
-                        
-                        // Atualizar títulos da página dinamicamente
-                        const pageTitle = document.getElementById('panel-title');
-                        const panelHeader = document.getElementById('panel-header');
-                        const channelNameInput = document.getElementById('channel-name');
-                        const footerText = document.getElementById('footer-text');
-                        
-                        if (pageTitle) {
-                            const status = currentData.isLive ? 'AO VIVO' : 'OFFLINE';
-                            pageTitle.textContent = `Painel ${currentData.streamerName} - ${status}`;
-                        }
-                        
-                        if (panelHeader) {
-                            panelHeader.textContent = `🎮 Painel de Controle - ${currentData.streamerName}`;
-                        }
-                        
-                        if (channelNameInput) {
-                            channelNameInput.value = channelInfo.login || channelInfo.display_name || 'N/A';
-                        }
-                        
-                        if (footerText) {
-                            footerText.textContent = `${currentData.streamerName} Stream Control v1.0 - Overlay Mobile para Lives IRL`;
-                        }
-                        
-                        // Se começou a fazer live agora
-                        if (currentData.isLive && !wasLive) {
-                            streamStartTime = channelInfo.started_at ? new Date(channelInfo.started_at) : new Date();
-                            peakViewers = currentData.viewers;
-                            totalViewers = currentData.viewers;
-                            viewerSamples = 1;
-                            addToLog('🔴 Stream iniciada!', 'success');
-                            
-                            // Ativar gerador de clips se stream começou
-                            if (typeof clipGenerator !== 'undefined' && !clipGenerator.isEnabled) {
-                                await clipGenerator.initialize();
-                            }
-                        }
-                        
-                        // Se parou de fazer live
-                        if (!currentData.isLive && wasLive) {
-                            streamStartTime = null;
-                            addToLog('⚫ Stream finalizada!', 'info');
-                            
-                            // Parar gerador de clips
-                            if (typeof clipGenerator !== 'undefined') {
-                                clipGenerator.stop();
-                            }
-                        }
-                        
-                        // Atualizar analytics se ao vivo
-                        if (currentData.isLive) {
-                            if (currentData.viewers > peakViewers) {
-                                peakViewers = currentData.viewers;
-                            }
-                            totalViewers += currentData.viewers;
-                            viewerSamples++;
-                            
-                            // Verificar triggers do gerador de clips
-                            if (typeof clipGenerator !== 'undefined' && clipGenerator.isEnabled) {
-                                await clipGenerator.checkAutoClipTriggers(channelInfo);
-                            }
-                        }
-                        
-                        // Atualizar display
-                        atualizarDisplay();
-                        
-                        addToLog(`📊 Dados atualizados: ${currentData.viewers} viewers, ${currentData.followers} seguidores`, 'success');
-                    } else {
-                        addToLog('⚠️ Não foi possível obter dados do canal', 'error');
-                    }
-                } else {
-                    addToLog('⚠️ API não disponível para atualização', 'error');
+                    channelInfo = await twitchAPI.getChannelInfo();
                 }
+                
+                // Se não conseguiu dados da API, usar simulados
+                if (!channelInfo || !channelInfo.display_name) {
+                    addToLog('⚠️ API não retornou dados, usando simulação', 'info');
+                    channelInfo = gerarDadosSimulados();
+                }
+                
+                // Atualizar dados atuais
+                const wasLive = currentData.isLive;
+                currentData = {
+                    viewers: channelInfo.viewer_count || 0,
+                    followers: channelInfo.follower_count || 0,
+                    isLive: channelInfo.is_live !== undefined ? channelInfo.is_live : true,
+                    title: channelInfo.title || 'Live IRL - Explorando a cidade!',
+                    category: channelInfo.game_name || 'IRL',
+                    quality: channelInfo.is_live ? 'Ao vivo' : 'Simulado',
+                    streamerName: channelInfo.display_name || channelInfo.login || CONFIG.CHANNEL_NAME || 'Streamer'
+                };
+                
+                // Atualizar títulos da página dinamicamente
+                const pageTitle = document.getElementById('panel-title');
+                const panelHeader = document.getElementById('panel-header');
+                const channelNameInput = document.getElementById('channel-name');
+                const footerText = document.getElementById('footer-text');
+                
+                if (pageTitle) {
+                    const status = currentData.isLive ? 'AO VIVO' : 'OFFLINE';
+                    pageTitle.textContent = `Painel ${currentData.streamerName} - ${status}`;
+                }
+                
+                if (panelHeader) {
+                    panelHeader.textContent = `🎮 Painel de Controle - ${currentData.streamerName}`;
+                }
+                
+                if (channelNameInput) {
+                    channelNameInput.value = channelInfo.login || channelInfo.display_name || CONFIG.CHANNEL_NAME || 'N/A';
+                }
+                
+                if (footerText) {
+                    footerText.textContent = `${currentData.streamerName} Stream Control v1.0 - Overlay Mobile para Lives IRL`;
+                }
+                
+                // Se começou a fazer live agora
+                if (currentData.isLive && !wasLive) {
+                    streamStartTime = channelInfo.started_at ? new Date(channelInfo.started_at) : new Date();
+                    peakViewers = currentData.viewers;
+                    totalViewers = currentData.viewers;
+                    viewerSamples = 1;
+                    addToLog('🔴 Stream iniciada!', 'success');
+                    
+                    // Ativar gerador de clips se stream começou
+                    if (typeof clipGenerator !== 'undefined' && !clipGenerator.isEnabled) {
+                        await clipGenerator.initialize();
+                    }
+                }
+                
+                // Se parou de fazer live
+                if (!currentData.isLive && wasLive) {
+                    streamStartTime = null;
+                    addToLog('⚫ Stream finalizada!', 'info');
+                    
+                    // Parar gerador de clips
+                    if (typeof clipGenerator !== 'undefined') {
+                        clipGenerator.stop();
+                    }
+                }
+                
+                // Atualizar analytics se ao vivo
+                if (currentData.isLive) {
+                    if (currentData.viewers > peakViewers) {
+                        peakViewers = currentData.viewers;
+                    }
+                    totalViewers += currentData.viewers;
+                    viewerSamples++;
+                    
+                    // Verificar triggers do gerador de clips
+                    if (typeof clipGenerator !== 'undefined' && clipGenerator.isEnabled) {
+                        await clipGenerator.checkAutoClipTriggers(channelInfo);
+                    }
+                }
+                
+                // Atualizar display
+                atualizarDisplay();
+                
+                addToLog(`📊 Dados atualizados: ${currentData.viewers} viewers, ${currentData.followers} seguidores`, 'success');
+                
             } catch (error) {
                 addToLog(`❌ Erro ao atualizar: ${error.message}`, 'error');
+                
+                // Mesmo com erro, garantir que temos dados
+                if (!currentData.streamerName || currentData.streamerName === 'Streamer') {
+                    const dadosSimulados = gerarDadosSimulados();
+                    currentData = {
+                        viewers: dadosSimulados.viewer_count,
+                        followers: dadosSimulados.follower_count,
+                        isLive: true,
+                        title: dadosSimulados.title,
+                        category: dadosSimulados.game_name,
+                        quality: 'Simulado',
+                        streamerName: dadosSimulados.display_name
+                    };
+                    atualizarDisplay();
+                }
             }
+        }
+
+        // Função para gerar dados simulados
+        function gerarDadosSimulados() {
+            const channelName = CONFIG.CHANNEL_NAME || 'flwbielzin';
+            const displayName = channelName.charAt(0).toUpperCase() + channelName.slice(1);
+            
+            return {
+                id: 'simulated',
+                login: channelName,
+                display_name: displayName,
+                profile_image_url: `https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-70x70.png`,
+                is_live: true, // Sempre mostrar como ao vivo para demonstração
+                viewer_count: Math.floor(Math.random() * 80) + 25, // 25-105 viewers
+                follower_count: Math.floor(Math.random() * 1500) + 800, // 800-2300 followers
+                title: gerarTituloAleatorio(),
+                game_name: 'IRL',
+                started_at: new Date(Date.now() - Math.random() * 7200000).toISOString() // Até 2h atrás
+            };
+        }
+
+        // Função para gerar título aleatório
+        function gerarTituloAleatorio() {
+            const titles = [
+                'Live IRL - Explorando a cidade! 🎮',
+                'Conversando com o chat ao vivo 💬',
+                'Stream chill - Vem conversar! ✨',
+                'Interagindo com vocês! 🎉',
+                'Live descontraída 😄',
+                'Passeando pela cidade 🚶‍♂️',
+                'Chat e diversão! 🎯'
+            ];
+            return titles[Math.floor(Math.random() * titles.length)];
         }
 
         function atualizarDisplay() {
@@ -990,13 +1090,11 @@
 
         function carregarConfiguracoes() {
             // Carregar configurações salvas
-            const location = localStorage.getItem('overlay-location');
             const theme = localStorage.getItem('overlay-theme');
             const size = localStorage.getItem('overlay-size');
             const notifications = localStorage.getItem('overlay-notifications');
             const interval = localStorage.getItem('update-interval');
             
-            if (location) document.getElementById('location-input').value = location;
             if (theme) document.getElementById('overlay-theme').value = theme;
             if (size) document.getElementById('overlay-size').value = size;
             if (notifications) document.getElementById('notifications').value = notifications;
@@ -1004,13 +1102,11 @@
         }
 
         function salvarConfiguracoes() {
-            const location = document.getElementById('location-input').value;
             const theme = document.getElementById('overlay-theme').value;
             const size = document.getElementById('overlay-size').value;
             const notifications = document.getElementById('notifications').value;
             const interval = document.getElementById('update-interval').value;
             
-            localStorage.setItem('overlay-location', location);
             localStorage.setItem('overlay-theme', theme);
             localStorage.setItem('overlay-size', size);
             localStorage.setItem('overlay-notifications', notifications);
@@ -1027,7 +1123,6 @@
 
         function resetarConfiguracoes() {
             localStorage.clear();
-            document.getElementById('location-input').value = '';
             document.getElementById('overlay-theme').value = 'purple';
             document.getElementById('overlay-size').value = 'medium';
             document.getElementById('notifications').value = 'all';
@@ -1037,7 +1132,6 @@
 
         function exportarConfiguracoes() {
             const config = {
-                location: document.getElementById('location-input').value,
                 theme: document.getElementById('overlay-theme').value,
                 size: document.getElementById('overlay-size').value,
                 notifications: document.getElementById('notifications').value,
@@ -1216,6 +1310,23 @@
                 clearInterval(updateInterval);
             }
         });
+
+        // Inicializar API da Twitch
+        async function initializeTwitchAPI() {
+            try {
+                if (typeof TwitchAPI !== 'undefined') {
+                    twitchAPI = new TwitchAPI();
+                    addToLog('✅ TwitchAPI inicializada', 'success');
+                    return true;
+                } else {
+                    addToLog('❌ Classe TwitchAPI não encontrada', 'error');
+                    return false;
+                }
+            } catch (error) {
+                addToLog(`❌ Erro ao inicializar API: ${error.message}`, 'error');
+                return false;
+            }
+        }
     </script>
 </body>
 </html> 
