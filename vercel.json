@@ -13,7 +13,7 @@
   ],
   "headers": [
     {
-      "source": "**/*.html",
+      "source": "/(.*)\\.html",
       "headers": [
         {
           "key": "Cache-Control",
@@ -34,7 +34,7 @@
       ]
     },
     {
-      "source": "**/*.js",
+      "source": "/(.*)\\.js",
       "headers": [
         {
           "key": "Cache-Control",
