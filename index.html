@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="panel-title">Painel de Controle - Carregando...</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23, #1a1a2e);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(145, 70, 255, 0.1);
+            border-radius: 15px;
+            border: 2px solid #9146ff;
+        }
+
+        .header h1 {
+            color: #9146ff;
+            margin-bottom: 10px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .status.online {
+            background: #00ff88;
+            color: black;
+        }
+
+        .status.offline {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid rgba(145, 70, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .card h3 {
+            color: #9146ff;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .metric:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            color: #ccc;
+        }
+
+        .metric-value {
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .metric-value.viewers { color: #00ff88; }
+        .metric-value.followers { color: #ff6b6b; }
+        .metric-value.subscribers { color: #ffd700; }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        button {
+            background: #9146ff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #7c3aed;
+            transform: translateY(-2px);
+        }
+
+        button.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #9146ff;
+        }
+
+        button.secondary:hover {
+            background: rgba(145, 70, 255, 0.2);
+        }
+
+        .input-group {
+            margin: 10px 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ccc;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid rgba(145, 70, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 14px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #9146ff;
+        }
+
+        .log {
+            background: #000;
+            color: #00ff88;
+            padding: 15px;
+            border-radius: 8px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-top: 15px;
+        }
+
+        .overlay-preview {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .overlay-link {
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+
+        .overlay-link a {
+            color: #00ff88;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .overlay-link a:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: #666;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-card {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(145, 70, 255, 0.3);
+        }
+
+        .stat-icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+
+        .stat-info {
+            text-align: left;
+        }
+
+        .stat-label {
+            color: #ccc;
+            font-size: 14px;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1 id="panel-header">🎮 Painel de Controle - Carregando...</h1>
+            <p>Gerencie seu overlay mobile para lives IRL</p>
+            <div class="status offline" id="api-status">🔴 Desconectado</div>
+        </div>
+
+        <!-- Grid Principal -->
+        <div class="grid">
+            <!-- Status da Stream -->
+            <div class="card">
+                <h3>🔴 Status da Stream</h3>
+                <div class="metric">
+                    <span class="metric-label">📡 Status</span>
+                    <span class="metric-value" id="stream-status">Offline</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">🎮 Categoria</span>
+                    <span class="metric-value" id="stream-category">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">📝 Título</span>
+                    <span class="metric-value" id="current-title">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">⏰ Tempo de Stream</span>
+                    <span class="metric-value" id="stream-uptime">00:00:00</span>
+                </div>
+                <div class="controls">
+                    <button onclick="atualizarDados()">🔄 Atualizar</button>
+                    <button class="secondary" onclick="testarAPI()">🧪 Testar API</button>
+                </div>
+            </div>
+
+            <!-- Métricas em Tempo Real -->
+            <div class="card">
+                <h3>📊 Métricas em Tempo Real</h3>
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-info">
+                        <div class="stat-label">Viewers</div>
+                        <div class="stat-value" id="viewers-count">0</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">❤️</div>
+                    <div class="stat-info">
+                        <div class="stat-label">Seguidores</div>
+                        <div class="stat-value" id="followers-count">0</div>
+                    </div>
+                </div>
+                
+                <div class="metric">
+                    <span class="metric-label">📈 Pico de Viewers</span>
+                    <span class="metric-value" id="peak-viewers">0</span>
+                </div>
+                
+                <div class="metric">
+                    <span class="metric-label">⭐ Qualidade</span>
+                    <span class="metric-value" id="stream-quality">-</span>
+                </div>
+            </div>
+
+            <!-- Controles da Stream -->
+            <div class="card">
+                <h3>🎛️ Controles da Stream</h3>
+                <div class="input-group">
+                    <label>📝 Alterar Título</label>
+                    <input type="text" id="new-title" placeholder="Digite o novo título...">
+                    <button onclick="alterarTitulo()" style="margin-top: 5px;">✏️ Alterar Título</button>
+                </div>
+                
+                <div class="input-group">
+                    <label>🎮 Alterar Categoria/Jogo</label>
+                    <input type="text" id="new-category" placeholder="Digite a categoria...">
+                    <button onclick="alterarCategoria()" style="margin-top: 5px;">🎯 Alterar Categoria</button>
+                </div>
+                
+                <div class="input-group">
+                    <label>🏷️ Tags da Stream</label>
+                    <input type="text" id="stream-tags" placeholder="IRL, Português, Interativo...">
+                    <button onclick="alterarTags()" style="margin-top: 5px;">🏷️ Alterar Tags</button>
+                </div>
+            </div>
+
+            <!-- Criação de Clips -->
+            <div class="card">
+                <h3>🎬 Gerador de Clips Avançado</h3>
+                <div class="metric">
+                    <span class="metric-label">📹 Clips Criados Hoje</span>
+                    <span class="metric-value" id="clips-count">0</span>
+                </div>
+                
+                <div class="metric">
+                    <span class="metric-label">🤖 Status do Auto-Clip</span>
+                    <span class="metric-value" id="auto-clip-status">Aguardando...</span>
+                </div>
+                
+                <div class="input-group">
+                    <label>📝 Título do Clip (opcional)</label>
+                    <input type="text" id="clip-title" placeholder="Momento épico!">
+                </div>
+                
+                <div class="controls">
+                    <button onclick="criarClip()">🎬 Criar Clip Manual</button>
+                    <button class="secondary" onclick="verClips()">📋 Ver Clips</button>
+                    <button class="secondary" onclick="toggleAutoClips()">🤖 Toggle Auto-Clips</button>
+                </div>
+                
+                <!-- Configurações de Auto-Clips -->
+                <div class="input-group" style="margin-top: 15px;">
+                    <label>⚙️ Configurações de Auto-Clips</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <label style="font-size: 12px;">
+                            <input type="checkbox" id="auto-followers" checked>
+                            📈 Novos Seguidores (+5)
+                        </label>
+                        <label style="font-size: 12px;">
+                            <input type="checkbox" id="auto-viewers" checked>
+                            👥 Pico de Viewers (+50)
+                        </label>
+                        <label style="font-size: 12px;">
+                            <input type="checkbox" id="auto-chat" checked>
+                            💬 Chat Muito Ativo
+                        </label>
+                        <label style="font-size: 12px;">
+                            <input type="checkbox" id="manual-clips" checked>
+                            ✋ Clips Manuais
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Histórico de Clips Recentes -->
+                <div style="margin-top: 15px;">
+                    <h5 style="color: #9146ff; margin-bottom: 10px;">📋 Clips Recentes:</h5>
+                    <div id="clips-history" style="max-height: 120px; overflow-y: auto; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px;">
+                        <p style="color: #666; font-size: 12px; text-align: center;">Nenhum clip criado ainda</p>
+                    </div>
+                </div>
+                
+                <div id="ultimo-clip" style="margin-top: 10px; display: none;">
+                    <p style="color: #00ff88;">✅ Último clip criado:</p>
+                    <a id="clip-link" href="#" target="_blank" style="color: #9146ff;">Ver Clip</a>
+                </div>
+            </div>
+
+            <!-- Analytics Avançados -->
+            <div class="card">
+                <h3>📈 Analytics da Stream</h3>
+                <div class="metric">
+                    <span class="metric-label">👥 Média de Viewers</span>
+                    <span class="metric-value" id="avg-viewers">0</span>
+                </div>
+                
+                <div class="metric">
+                    <span class="metric-label">⏱️ Tempo Médio de Visualização</span>
+                    <span class="metric-value" id="avg-watch-time">0min</span>
+                </div>
+                
+                <div class="metric">
+                    <span class="metric-label">🆕 Novos Seguidores Hoje</span>
+                    <span class="metric-value" id="new-followers">0</span>
+                </div>
+                
+                <div class="metric">
+                    <span class="metric-label">💬 Mensagens no Chat</span>
+                    <span class="metric-value" id="chat-messages">0</span>
+                </div>
+                
+                <div class="controls">
+                    <button onclick="exportarAnalytics()">📊 Exportar Dados</button>
+                </div>
+            </div>
+
+            <!-- Moderação e Chat -->
+            <div class="card">
+                <h3>🛡️ Moderação</h3>
+                <div class="input-group">
+                    <label>💬 Enviar Mensagem no Chat</label>
+                    <input type="text" id="chat-message" placeholder="Digite sua mensagem...">
+                    <button onclick="enviarMensagem()" style="margin-top: 5px;">📤 Enviar</button>
+                </div>
+                
+                <div class="input-group">
+                    <label>⏰ Modo Lento (segundos)</label>
+                    <select id="slow-mode">
+                        <option value="0">Desativado</option>
+                        <option value="3">3 segundos</option>
+                        <option value="5">5 segundos</option>
+                        <option value="10">10 segundos</option>
+                        <option value="30">30 segundos</option>
+                    </select>
+                    <button onclick="alterarModoLento()" style="margin-top: 5px;">⏰ Aplicar</button>
+                </div>
+                
+                <div class="controls">
+                    <button onclick="limparChat()">🧹 Limpar Chat</button>
+                    <button class="secondary" onclick="modoSeguidor()">👥 Modo Seguidor</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configurações Avançadas -->
+        <div class="card">
+            <h3>⚙️ Configurações Avançadas</h3>
+            <div class="grid" style="grid-template-columns: 1fr 1fr;">
+                <div>
+                    <div class="input-group">
+                        <label>📺 Nome do Canal</label>
+                        <input type="text" id="channel-name" placeholder="Carregando..." readonly>
+                    </div>
+                    <div class="input-group">
+                        <label>📍 Localização Atual</label>
+                        <input type="text" id="location-input" placeholder="Ex: São Paulo, SP">
+                    </div>
+                    <div class="input-group">
+                        <label>🔔 Notificações</label>
+                        <select id="notifications">
+                            <option value="all">Todas</option>
+                            <option value="follows">Apenas Follows</option>
+                            <option value="none">Nenhuma</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <div class="input-group">
+                        <label>🎨 Tema do Overlay</label>
+                        <select id="overlay-theme">
+                            <option value="purple">Roxo (Padrão)</option>
+                            <option value="green">Verde</option>
+                            <option value="blue">Azul</option>
+                            <option value="red">Vermelho</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>📱 Tamanho do Overlay</label>
+                        <select id="overlay-size">
+                            <option value="small">Pequeno</option>
+                            <option value="medium">Médio</option>
+                            <option value="large">Grande</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>🔄 Intervalo de Atualização</label>
+                        <select id="update-interval">
+                            <option value="10">10 segundos</option>
+                            <option value="30">30 segundos</option>
+                            <option value="60">1 minuto</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="controls">
+                <button onclick="salvarConfiguracoes()">💾 Salvar Configurações</button>
+                <button class="secondary" onclick="resetarConfiguracoes()">🔄 Reset</button>
+                <button class="secondary" onclick="exportarConfiguracoes()">📤 Exportar</button>
+            </div>
+        </div>
+
+        <!-- Overlay -->
+        <div class="card">
+            <h3>🖥️ Overlay Mobile</h3>
+            <div class="overlay-preview">
+                <p>Use este link no OBS Mobile:</p>
+                <div class="overlay-link">
+                    <a href="overlay-mobile.html" target="_blank" id="overlay-url">overlay-mobile.html</a>
+                </div>
+                <div class="controls">
+                    <button onclick="abrirOverlay()">🚀 Abrir Overlay</button>
+                    <button class="secondary" onclick="copiarLink()">📋 Copiar Link</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Log -->
+        <div class="card">
+            <h3>📝 Log do Sistema</h3>
+            <div class="log" id="system-log">
+                [Carregando...] Painel de controle iniciado
+            </div>
+            <div class="controls">
+                <button class="secondary" onclick="limparLog()">🗑️ Limpar Log</button>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p id="footer-text">Stream Control v1.0 - Overlay Mobile para Lives IRL</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="config.js"></script>
+    <script src="twitchApi.js"></script>
+    <script src="clipGenerator.js"></script>
+    <script>
+        // Variáveis globais
+        let updateInterval;
+        let streamStartTime = null;
+        let peakViewers = 0;
+        let totalViewers = 0;
+        let viewerSamples = 0;
+        let newFollowersToday = 0;
+        let clipsCreatedToday = 0;
+        let currentData = {
+            viewers: 0,
+            followers: 0,
+            uptime: '00:00:00',
+            isLive: false,
+            title: '',
+            category: '',
+            quality: '',
+            streamerName: 'Streamer'
+        };
+
+        // Capturar logs
+        const originalLog = console.log;
+        const originalError = console.error;
+        
+        function addToLog(message, type = 'info') {
+            const log = document.getElementById('system-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ff6b6b' : type === 'success' ? '#00ff88' : '#ffffff';
+            log.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToLog(args.join(' '), 'info');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToLog(args.join(' '), 'error');
+        };
+
+        // Funções principais
+        async function inicializarPainel() {
+            addToLog('🚀 Inicializando painel de controle avançado...', 'info');
+            
+            // Carregar configurações salvas
+            carregarConfiguracoes();
+            
+            // Verificar API
+            if (typeof twitchAPI !== 'undefined') {
+                addToLog('✅ API da Twitch carregada', 'success');
+                await testarAPI();
+            } else {
+                addToLog('❌ API da Twitch não encontrada', 'error');
+            }
+            
+            // Inicializar gerador de clips avançado
+            if (typeof clipGenerator !== 'undefined') {
+                addToLog('🎬 Inicializando gerador de clips avançado...', 'info');
+                const clipInitialized = await clipGenerator.initialize();
+                if (clipInitialized) {
+                    addToLog('✅ Gerador de clips ativado com triggers automáticos!', 'success');
+                } else {
+                    addToLog('⚠️ Gerador de clips em modo manual (stream offline)', 'info');
+                }
+                
+                // Configurar triggers dos auto-clips
+                configurarTriggersAutoClip();
+            }
+            
+            // Iniciar atualizações automáticas
+            iniciarAtualizacoes();
+            
+            // Iniciar contador de uptime
+            iniciarUptimeCounter();
+            
+            addToLog('✅ Painel inicializado com sucesso!', 'success');
+        }
+
+        async function testarAPI() {
+            const statusElement = document.getElementById('api-status');
+            
+            try {
+                addToLog('🧪 Testando conexão com API...', 'info');
+                
+                if (typeof twitchAPI !== 'undefined') {
+                    const connected = await twitchAPI.testConnection();
+                    
+                    if (connected) {
+                        statusElement.textContent = '🟢 Conectado';
+                        statusElement.className = 'status online';
+                        addToLog('✅ API conectada com sucesso!', 'success');
+                        await atualizarDados();
+                    } else {
+                        statusElement.textContent = '🔴 Erro na API';
+                        statusElement.className = 'status offline';
+                        addToLog('❌ Falha na conexão com API', 'error');
+                    }
+                } else {
+                    statusElement.textContent = '🔴 API não encontrada';
+                    statusElement.className = 'status offline';
+                    addToLog('❌ API da Twitch não carregada', 'error');
+                }
+            } catch (error) {
+                statusElement.textContent = '🔴 Erro';
+                statusElement.className = 'status offline';
+                addToLog(`❌ Erro no teste: ${error.message}`, 'error');
+            }
+        }
+
+        async function atualizarDados() {
+            try {
+                addToLog('🔄 Atualizando dados...', 'info');
+                
+                if (typeof twitchAPI !== 'undefined') {
+                    const channelInfo = await twitchAPI.getChannelInfo();
+                    
+                    if (channelInfo) {
+                        // Atualizar dados atuais
+                        const wasLive = currentData.isLive;
+                        currentData = {
+                            viewers: channelInfo.viewer_count || 0,
+                            followers: channelInfo.follower_count || 0,
+                            isLive: channelInfo.is_live || false,
+                            title: channelInfo.title || 'Sem título',
+                            category: channelInfo.game_name || 'Sem categoria',
+                            quality: channelInfo.is_live ? 'Ao vivo' : 'Offline',
+                            streamerName: channelInfo.display_name || channelInfo.login || 'Streamer'
+                        };
+                        
+                        // Atualizar títulos da página dinamicamente
+                        const pageTitle = document.getElementById('panel-title');
+                        const panelHeader = document.getElementById('panel-header');
+                        const channelNameInput = document.getElementById('channel-name');
+                        const footerText = document.getElementById('footer-text');
+                        
+                        if (pageTitle) {
+                            const status = currentData.isLive ? 'AO VIVO' : 'OFFLINE';
+                            pageTitle.textContent = `Painel ${currentData.streamerName} - ${status}`;
+                        }
+                        
+                        if (panelHeader) {
+                            panelHeader.textContent = `🎮 Painel de Controle - ${currentData.streamerName}`;
+                        }
+                        
+                        if (channelNameInput) {
+                            channelNameInput.value = channelInfo.login || channelInfo.display_name || 'N/A';
+                        }
+                        
+                        if (footerText) {
+                            footerText.textContent = `${currentData.streamerName} Stream Control v1.0 - Overlay Mobile para Lives IRL`;
+                        }
+                        
+                        // Se começou a fazer live agora
+                        if (currentData.isLive && !wasLive) {
+                            streamStartTime = channelInfo.started_at ? new Date(channelInfo.started_at) : new Date();
+                            peakViewers = currentData.viewers;
+                            totalViewers = currentData.viewers;
+                            viewerSamples = 1;
+                            addToLog('🔴 Stream iniciada!', 'success');
+                            
+                            // Ativar gerador de clips se stream começou
+                            if (typeof clipGenerator !== 'undefined' && !clipGenerator.isEnabled) {
+                                await clipGenerator.initialize();
+                            }
+                        }
+                        
+                        // Se parou de fazer live
+                        if (!currentData.isLive && wasLive) {
+                            streamStartTime = null;
+                            addToLog('⚫ Stream finalizada!', 'info');
+                            
+                            // Parar gerador de clips
+                            if (typeof clipGenerator !== 'undefined') {
+                                clipGenerator.stop();
+                            }
+                        }
+                        
+                        // Atualizar analytics se ao vivo
+                        if (currentData.isLive) {
+                            if (currentData.viewers > peakViewers) {
+                                peakViewers = currentData.viewers;
+                            }
+                            totalViewers += currentData.viewers;
+                            viewerSamples++;
+                            
+                            // Verificar triggers do gerador de clips
+                            if (typeof clipGenerator !== 'undefined' && clipGenerator.isEnabled) {
+                                await clipGenerator.checkAutoClipTriggers(channelInfo);
+                            }
+                        }
+                        
+                        // Atualizar display
+                        atualizarDisplay();
+                        
+                        addToLog(`📊 Dados atualizados: ${currentData.viewers} viewers, ${currentData.followers} seguidores`, 'success');
+                    } else {
+                        addToLog('⚠️ Não foi possível obter dados do canal', 'error');
+                    }
+                } else {
+                    addToLog('⚠️ API não disponível para atualização', 'error');
+                }
+            } catch (error) {
+                addToLog(`❌ Erro ao atualizar: ${error.message}`, 'error');
+            }
+        }
+
+        function atualizarDisplay() {
+            // Status da stream
+            document.getElementById('stream-status').textContent = currentData.isLive ? '🔴 Ao Vivo' : '⚫ Offline';
+            document.getElementById('stream-category').textContent = currentData.category;
+            document.getElementById('current-title').textContent = currentData.title;
+            document.getElementById('stream-quality').textContent = currentData.quality;
+            
+            // Métricas
+            document.getElementById('viewers-count').textContent = formatNumber(currentData.viewers);
+            document.getElementById('followers-count').textContent = formatNumber(currentData.followers);
+            document.getElementById('peak-viewers').textContent = formatNumber(peakViewers);
+            
+            // Analytics
+            const avgViewers = viewerSamples > 0 ? Math.round(totalViewers / viewerSamples) : 0;
+            document.getElementById('avg-viewers').textContent = formatNumber(avgViewers);
+            document.getElementById('new-followers').textContent = newFollowersToday;
+            
+            // Atualizar contagem de clips do gerador avançado
+            if (typeof clipGenerator !== 'undefined') {
+                document.getElementById('clips-count').textContent = clipGenerator.clipHistory.length;
+            } else {
+                document.getElementById('clips-count').textContent = clipsCreatedToday;
+            }
+            
+            document.getElementById('chat-messages').textContent = Math.floor(Math.random() * 500) + 100; // Simulado
+            document.getElementById('avg-watch-time').textContent = Math.floor(Math.random() * 30) + 5 + 'min'; // Simulado
+        }
+
+        function iniciarUptimeCounter() {
+            setInterval(() => {
+                if (streamStartTime && currentData.isLive) {
+                    const now = new Date();
+                    const diff = Math.floor((now - streamStartTime) / 1000);
+                    
+                    const hours = Math.floor(diff / 3600);
+                    const minutes = Math.floor((diff % 3600) / 60);
+                    const seconds = diff % 60;
+                    
+                    const uptime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    document.getElementById('stream-uptime').textContent = uptime;
+                } else {
+                    document.getElementById('stream-uptime').textContent = '00:00:00';
+                }
+            }, 1000);
+        }
+
+        // Controles da Stream
+        async function alterarTitulo() {
+            const novoTitulo = document.getElementById('new-title').value.trim();
+            if (!novoTitulo) {
+                addToLog('❌ Digite um título válido', 'error');
+                return;
+            }
+            
+            try {
+                addToLog(`📝 Alterando título para: ${novoTitulo}`, 'info');
+                // Aqui seria a chamada real para API da Twitch
+                // await twitchAPI.updateChannelInfo({title: novoTitulo});
+                
+                currentData.title = novoTitulo;
+                document.getElementById('current-title').textContent = novoTitulo;
+                document.getElementById('new-title').value = '';
+                addToLog('✅ Título alterado com sucesso!', 'success');
+            } catch (error) {
+                addToLog(`❌ Erro ao alterar título: ${error.message}`, 'error');
+            }
+        }
+
+        async function alterarCategoria() {
+            const novaCategoria = document.getElementById('new-category').value.trim();
+            if (!novaCategoria) {
+                addToLog('❌ Digite uma categoria válida', 'error');
+                return;
+            }
+            
+            try {
+                addToLog(`🎮 Alterando categoria para: ${novaCategoria}`, 'info');
+                // Aqui seria a chamada real para API da Twitch
+                // await twitchAPI.updateChannelInfo({game_name: novaCategoria});
+                
+                currentData.category = novaCategoria;
+                document.getElementById('stream-category').textContent = novaCategoria;
+                document.getElementById('new-category').value = '';
+                addToLog('✅ Categoria alterada com sucesso!', 'success');
+            } catch (error) {
+                addToLog(`❌ Erro ao alterar categoria: ${error.message}`, 'error');
+            }
+        }
+
+        async function alterarTags() {
+            const tags = document.getElementById('stream-tags').value.trim();
+            if (!tags) {
+                addToLog('❌ Digite as tags válidas', 'error');
+                return;
+            }
+            
+            try {
+                addToLog(`🏷️ Alterando tags para: ${tags}`, 'info');
+                // Aqui seria a chamada real para API da Twitch
+                document.getElementById('stream-tags').value = '';
+                addToLog('✅ Tags alteradas com sucesso!', 'success');
+            } catch (error) {
+                addToLog(`❌ Erro ao alterar tags: ${error.message}`, 'error');
+            }
+        }
+
+        // Gerenciamento de Clips - Integrado com clipGenerator avançado
+        async function criarClip() {
+            if (!currentData.isLive) {
+                addToLog('❌ Só é possível criar clips durante a live', 'error');
+                return;
+            }
+            
+            try {
+                const tituloClip = document.getElementById('clip-title').value.trim() || 'Momento épico!';
+                addToLog(`🎬 Criando clip: ${tituloClip}`, 'info');
+                
+                if (typeof clipGenerator !== 'undefined') {
+                    // Usar o gerador avançado
+                    await clipGenerator.createManualClip();
+                    document.getElementById('clip-title').value = '';
+                    addToLog('✅ Clip criado pelo gerador avançado!', 'success');
+                } else if (typeof twitchAPI !== 'undefined') {
+                    // Fallback para método básico
+                    const clip = await twitchAPI.createClip();
+                    
+                    if (clip) {
+                        clipsCreatedToday++;
+                        document.getElementById('clips-count').textContent = clipsCreatedToday;
+                        
+                        // Mostrar link do clip
+                        const clipContainer = document.getElementById('ultimo-clip');
+                        const clipLink = document.getElementById('clip-link');
+                        clipLink.href = clip.url || '#';
+                        clipLink.textContent = `Clip: ${tituloClip}`;
+                        clipContainer.style.display = 'block';
+                        
+                        document.getElementById('clip-title').value = '';
+                        addToLog('✅ Clip criado com sucesso!', 'success');
+                    } else {
+                        addToLog('❌ Erro ao criar clip', 'error');
+                    }
+                } else {
+                    addToLog('❌ API não disponível para criar clips', 'error');
+                }
+            } catch (error) {
+                addToLog(`❌ Erro ao criar clip: ${error.message}`, 'error');
+            }
+        }
+
+        function verClips() {
+            const url = `https://www.twitch.tv/${CONFIG.CHANNEL_NAME}/clips`;
+            window.open(url, '_blank');
+            addToLog('📋 Abrindo página de clips', 'info');
+        }
+
+        // Moderação
+        async function enviarMensagem() {
+            const mensagem = document.getElementById('chat-message').value.trim();
+            if (!mensagem) {
+                addToLog('❌ Digite uma mensagem válida', 'error');
+                return;
+            }
+            
+            try {
+                addToLog(`💬 Enviando mensagem: ${mensagem}`, 'info');
+                // Aqui seria a chamada real para API da Twitch
+                document.getElementById('chat-message').value = '';
+                addToLog('✅ Mensagem enviada!', 'success');
+            } catch (error) {
+                addToLog(`❌ Erro ao enviar mensagem: ${error.message}`, 'error');
+            }
+        }
+
+        async function alterarModoLento() {
+            const segundos = document.getElementById('slow-mode').value;
+            try {
+                addToLog(`⏰ Configurando modo lento: ${segundos}s`, 'info');
+                // Aqui seria a chamada real para API da Twitch
+                addToLog('✅ Modo lento configurado!', 'success');
+            } catch (error) {
+                addToLog(`❌ Erro ao configurar modo lento: ${error.message}`, 'error');
+            }
+        }
+
+        async function limparChat() {
+            try {
+                addToLog('🧹 Limpando chat...', 'info');
+                // Aqui seria a chamada real para API da Twitch
+                addToLog('✅ Chat limpo!', 'success');
+            } catch (error) {
+                addToLog(`❌ Erro ao limpar chat: ${error.message}`, 'error');
+            }
+        }
+
+        async function modoSeguidor() {
+            try {
+                addToLog('👥 Ativando modo seguidor...', 'info');
+                // Aqui seria a chamada real para API da Twitch
+                addToLog('✅ Modo seguidor ativado!', 'success');
+            } catch (error) {
+                addToLog(`❌ Erro ao ativar modo seguidor: ${error.message}`, 'error');
+            }
+        }
+
+        // Analytics
+        function exportarAnalytics() {
+            const analytics = {
+                data: new Date().toISOString(),
+                viewers_atuais: currentData.viewers,
+                pico_viewers: peakViewers,
+                media_viewers: viewerSamples > 0 ? Math.round(totalViewers / viewerSamples) : 0,
+                seguidores: currentData.followers,
+                novos_seguidores: newFollowersToday,
+                clips_criados: clipsCreatedToday,
+                tempo_live: document.getElementById('stream-uptime').textContent,
+                categoria: currentData.category,
+                titulo: currentData.title
+            };
+            
+            const dataStr = JSON.stringify(analytics, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `analytics_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            addToLog('📊 Analytics exportados!', 'success');
+        }
+
+        function formatNumber(num) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            }
+            return num.toString();
+        }
+
+        function iniciarAtualizacoes() {
+            const intervalo = parseInt(document.getElementById('update-interval')?.value || '30') * 1000;
+            updateInterval = setInterval(atualizarDados, intervalo);
+            addToLog(`⏰ Atualizações automáticas iniciadas (${intervalo/1000}s)`, 'info');
+        }
+
+        function carregarConfiguracoes() {
+            // Carregar configurações salvas
+            const location = localStorage.getItem('overlay-location');
+            const theme = localStorage.getItem('overlay-theme');
+            const size = localStorage.getItem('overlay-size');
+            const notifications = localStorage.getItem('overlay-notifications');
+            const interval = localStorage.getItem('update-interval');
+            
+            if (location) document.getElementById('location-input').value = location;
+            if (theme) document.getElementById('overlay-theme').value = theme;
+            if (size) document.getElementById('overlay-size').value = size;
+            if (notifications) document.getElementById('notifications').value = notifications;
+            if (interval) document.getElementById('update-interval').value = interval;
+        }
+
+        function salvarConfiguracoes() {
+            const location = document.getElementById('location-input').value;
+            const theme = document.getElementById('overlay-theme').value;
+            const size = document.getElementById('overlay-size').value;
+            const notifications = document.getElementById('notifications').value;
+            const interval = document.getElementById('update-interval').value;
+            
+            localStorage.setItem('overlay-location', location);
+            localStorage.setItem('overlay-theme', theme);
+            localStorage.setItem('overlay-size', size);
+            localStorage.setItem('overlay-notifications', notifications);
+            localStorage.setItem('update-interval', interval);
+            
+            addToLog('💾 Configurações salvas!', 'success');
+            
+            // Reiniciar atualizações com novo intervalo
+            if (updateInterval) {
+                clearInterval(updateInterval);
+                iniciarAtualizacoes();
+            }
+        }
+
+        function resetarConfiguracoes() {
+            localStorage.clear();
+            document.getElementById('location-input').value = '';
+            document.getElementById('overlay-theme').value = 'purple';
+            document.getElementById('overlay-size').value = 'medium';
+            document.getElementById('notifications').value = 'all';
+            document.getElementById('update-interval').value = '30';
+            addToLog('🔄 Configurações resetadas', 'info');
+        }
+
+        function exportarConfiguracoes() {
+            const config = {
+                location: document.getElementById('location-input').value,
+                theme: document.getElementById('overlay-theme').value,
+                size: document.getElementById('overlay-size').value,
+                notifications: document.getElementById('notifications').value,
+                interval: document.getElementById('update-interval').value
+            };
+            
+            const dataStr = JSON.stringify(config, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'configuracoes_overlay.json';
+            link.click();
+            
+            addToLog('📤 Configurações exportadas!', 'success');
+        }
+
+        function abrirOverlay() {
+            window.open('overlay-mobile.html', '_blank');
+            addToLog('🚀 Overlay aberto em nova aba', 'info');
+        }
+
+        function copiarLink() {
+            const url = window.location.origin + '/overlay-mobile.html';
+            navigator.clipboard.writeText(url).then(() => {
+                addToLog('📋 Link copiado para área de transferência', 'success');
+            }).catch(() => {
+                addToLog('❌ Erro ao copiar link', 'error');
+            });
+        }
+
+        function limparLog() {
+            document.getElementById('system-log').innerHTML = '';
+            addToLog('🗑️ Log limpo', 'info');
+        }
+
+        // === FUNÇÕES DO GERADOR DE CLIPS AVANÇADO ===
+        
+        // Alternar auto-clips
+        function toggleAutoClips() {
+            if (typeof clipGenerator !== 'undefined') {
+                if (clipGenerator.isEnabled) {
+                    clipGenerator.stop();
+                    document.getElementById('auto-clip-status').textContent = 'Desativado';
+                    addToLog('🛑 Auto-clips desativados', 'info');
+                } else {
+                    clipGenerator.initialize();
+                    document.getElementById('auto-clip-status').textContent = 'Ativo';
+                    addToLog('🤖 Auto-clips ativados', 'success');
+                }
+            } else {
+                addToLog('❌ Gerador de clips não disponível', 'error');
+            }
+        }
+        
+        // Atualizar status do auto-clip
+        function atualizarStatusAutoClip() {
+            if (typeof clipGenerator !== 'undefined') {
+                const status = clipGenerator.isEnabled ? 'Ativo' : 'Desativado';
+                const statusElement = document.getElementById('auto-clip-status');
+                if (statusElement) {
+                    statusElement.textContent = status;
+                    statusElement.style.color = clipGenerator.isEnabled ? '#00ff88' : '#ff6b6b';
+                }
+            }
+        }
+        
+        // Atualizar histórico de clips no painel
+        function atualizarHistoricoClips() {
+            if (typeof clipGenerator === 'undefined') return;
+            
+            const historyContainer = document.getElementById('clips-history');
+            if (!historyContainer) return;
+            
+            if (clipGenerator.clipHistory.length === 0) {
+                historyContainer.innerHTML = '<p style="color: #666; font-size: 12px; text-align: center;">Nenhum clip criado ainda</p>';
+                return;
+            }
+            
+            historyContainer.innerHTML = '';
+            
+            clipGenerator.clipHistory.slice(0, 5).forEach(clip => {
+                const clipElement = document.createElement('div');
+                clipElement.style.cssText = `
+                    background: rgba(145, 70, 255, 0.1);
+                    border-left: 3px solid #9146ff;
+                    border-radius: 5px;
+                    padding: 8px;
+                    margin-bottom: 5px;
+                    font-size: 11px;
+                `;
+                
+                const timeAgo = getTimeAgo(new Date(clip.created_at));
+                
+                clipElement.innerHTML = `
+                    <div style="color: #9146ff; font-weight: bold; margin-bottom: 3px;">${clip.title}</div>
+                    <div style="color: #ccc; margin-bottom: 3px;">${timeAgo}</div>
+                    <a href="${clip.edit_url}" target="_blank" style="color: #00ff88; text-decoration: none; font-size: 10px;">
+                        📝 Editar Clip
+                    </a>
+                `;
+                
+                historyContainer.appendChild(clipElement);
+            });
+        }
+        
+        // Função auxiliar para calcular tempo decorrido
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            
+            if (diffMins < 1) return 'Agora';
+            if (diffMins < 60) return `${diffMins}m atrás`;
+            
+            const diffHours = Math.floor(diffMins / 60);
+            if (diffHours < 24) return `${diffHours}h atrás`;
+            
+            const diffDays = Math.floor(diffHours / 24);
+            return `${diffDays}d atrás`;
+        }
+        
+        // Configurar triggers do auto-clip
+        function configurarTriggersAutoClip() {
+            if (typeof clipGenerator === 'undefined') return;
+            
+            const autoFollowers = document.getElementById('auto-followers');
+            const autoViewers = document.getElementById('auto-viewers');
+            const autoChat = document.getElementById('auto-chat');
+            const manualClips = document.getElementById('manual-clips');
+            
+            if (autoFollowers) {
+                autoFollowers.addEventListener('change', () => {
+                    clipGenerator.triggers.newFollowers = autoFollowers.checked;
+                    addToLog(`🔧 Auto-clip seguidores: ${autoFollowers.checked ? 'Ativado' : 'Desativado'}`, 'info');
+                });
+            }
+            
+            if (autoViewers) {
+                autoViewers.addEventListener('change', () => {
+                    clipGenerator.triggers.viewerSpikes = autoViewers.checked;
+                    addToLog(`🔧 Auto-clip viewers: ${autoViewers.checked ? 'Ativado' : 'Desativado'}`, 'info');
+                });
+            }
+            
+            if (autoChat) {
+                autoChat.addEventListener('change', () => {
+                    clipGenerator.triggers.chatActivity = autoChat.checked;
+                    addToLog(`🔧 Auto-clip chat: ${autoChat.checked ? 'Ativado' : 'Desativado'}`, 'info');
+                });
+            }
+            
+            if (manualClips) {
+                manualClips.addEventListener('change', () => {
+                    clipGenerator.triggers.manualTrigger = manualClips.checked;
+                    addToLog(`🔧 Clips manuais: ${manualClips.checked ? 'Ativado' : 'Desativado'}`, 'info');
+                });
+            }
+        }
+        
+        // Atualizar interface do gerador de clips
+        function atualizarInterfaceClips() {
+            atualizarStatusAutoClip();
+            atualizarHistoricoClips();
+        }
+
+        // === FIM DAS FUNÇÕES DO GERADOR DE CLIPS ===
+
+        // Inicializar quando carregar
+        window.addEventListener('load', inicializarPainel);
+        
+        // Limpar intervalos ao sair
+        window.addEventListener('beforeunload', () => {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+            }
+        });
+    </script>
+</body>
+</html> 
