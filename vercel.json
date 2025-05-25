@@ -65,11 +65,6 @@
       ]
     }
   ],
-  "functions": {
-    "painel-desktop.html": {
-      "maxDuration": 30
-    }
-  },
   "rewrites": [
     {
       "source": "/api/(.*)",
