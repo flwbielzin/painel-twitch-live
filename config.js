@@ -3,7 +3,7 @@ const CONFIG = {
     // Credenciais da Twitch
     TWITCH_CLIENT_ID: '0l2lo79eb0lyrx16oulgss85h11e3v',
     TWITCH_CLIENT_SECRET: 'wwkph643l9fjxsthmdwsj1a3rqj1r7',
-    CHANNEL_NAME: 'flwbielzin', // Corrigido: removido o 'n' extra
+    CHANNEL_NAME: 'flwbielzinn', // Nome correto do canal
     
     // URLs da API da Twitch
     API_BASE_URL: 'https://api.twitch.tv/helix',

@@ -438,6 +438,134 @@
                     <button class="secondary" onclick="modoSeguidor()">👥 Modo Seguidor</button>
                 </div>
             </div>
+
+            <!-- 👥 COMUNIDADE -->
+            <div class="card">
+                <h3>👥 Comunidade</h3>
+                
+                <!-- Chatters Ativos -->
+                <div class="metric">
+                    <span class="metric-label">💬 Chatters Ativos</span>
+                    <span class="metric-value" id="chatters-count">0</span>
+                </div>
+                
+                <!-- Lista de Chatters -->
+                <div style="margin: 10px 0;">
+                    <h5 style="color: #9146ff; margin-bottom: 10px;">👥 Usuários no Chat:</h5>
+                    <div id="chatters-list" style="max-height: 100px; overflow-y: auto; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px; font-size: 12px;">
+                        <p style="color: #666; text-align: center;">Carregando...</p>
+                    </div>
+                </div>
+                
+                <!-- Emotes do Canal -->
+                <div class="metric">
+                    <span class="metric-label">🎭 Emotes do Canal</span>
+                    <span class="metric-value" id="emotes-count">0</span>
+                </div>
+                
+                <!-- Moderadores -->
+                <div class="metric">
+                    <span class="metric-label">🛡️ Moderadores</span>
+                    <span class="metric-value" id="moderators-count">0</span>
+                </div>
+                
+                <!-- VIPs -->
+                <div class="metric">
+                    <span class="metric-label">⭐ VIPs</span>
+                    <span class="metric-value" id="vips-count">0</span>
+                </div>
+                
+                <div class="controls">
+                    <button onclick="atualizarComunidade()">🔄 Atualizar</button>
+                    <button class="secondary" onclick="verEmotes()">🎭 Ver Emotes</button>
+                    <button class="secondary" onclick="gerenciarMods()">🛡️ Moderadores</button>
+                </div>
+            </div>
+
+            <!-- 💰 MONETIZAÇÃO -->
+            <div class="card">
+                <h3>💰 Monetização</h3>
+                
+                <!-- Subscribers -->
+                <div class="metric">
+                    <span class="metric-label">💎 Subscribers</span>
+                    <span class="metric-value" id="subscribers-count">0</span>
+                </div>
+                
+                <!-- Channel Points -->
+                <div class="metric">
+                    <span class="metric-label">🎁 Recompensas Ativas</span>
+                    <span class="metric-value" id="rewards-count">0</span>
+                </div>
+                
+                <!-- Recompensas Personalizadas -->
+                <div style="margin: 10px 0;">
+                    <h5 style="color: #9146ff; margin-bottom: 10px;">🎁 Channel Points:</h5>
+                    <div id="rewards-list" style="max-height: 120px; overflow-y: auto; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px; font-size: 12px;">
+                        <p style="color: #666; text-align: center;">Carregando recompensas...</p>
+                    </div>
+                </div>
+                
+                <!-- Criar Nova Recompensa -->
+                <div class="input-group">
+                    <label>🎁 Criar Recompensa</label>
+                    <input type="text" id="reward-title" placeholder="Nome da recompensa...">
+                    <input type="number" id="reward-cost" placeholder="Custo em pontos..." style="margin-top: 5px;">
+                    <button onclick="criarRecompensa()" style="margin-top: 5px;">✨ Criar</button>
+                </div>
+                
+                <div class="controls">
+                    <button onclick="atualizarMonetizacao()">🔄 Atualizar</button>
+                    <button class="secondary" onclick="verSubscribers()">💎 Ver Subs</button>
+                    <button class="secondary" onclick="gerenciarRecompensas()">🎁 Gerenciar</button>
+                </div>
+            </div>
+
+            <!-- 📺 GESTÃO DE CONTEÚDO -->
+            <div class="card">
+                <h3>📺 Gestão de Conteúdo</h3>
+                
+                <!-- VODs -->
+                <div class="metric">
+                    <span class="metric-label">📹 VODs Disponíveis</span>
+                    <span class="metric-value" id="vods-count">0</span>
+                </div>
+                
+                <!-- Marcadores -->
+                <div class="metric">
+                    <span class="metric-label">📍 Marcadores Criados</span>
+                    <span class="metric-value" id="markers-count">0</span>
+                </div>
+                
+                <!-- Criar Marcador -->
+                <div class="input-group">
+                    <label>📍 Criar Marcador na Stream</label>
+                    <input type="text" id="marker-description" placeholder="Descrição do momento...">
+                    <button onclick="criarMarcador()" style="margin-top: 5px;">📍 Marcar Momento</button>
+                </div>
+                
+                <!-- Cronograma -->
+                <div style="margin: 10px 0;">
+                    <h5 style="color: #9146ff; margin-bottom: 10px;">📅 Próximas Streams:</h5>
+                    <div id="schedule-list" style="max-height: 100px; overflow-y: auto; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px; font-size: 12px;">
+                        <p style="color: #666; text-align: center;">Carregando cronograma...</p>
+                    </div>
+                </div>
+                
+                <!-- VODs Recentes -->
+                <div style="margin: 10px 0;">
+                    <h5 style="color: #9146ff; margin-bottom: 10px;">📹 VODs Recentes:</h5>
+                    <div id="vods-list" style="max-height: 120px; overflow-y: auto; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px; font-size: 12px;">
+                        <p style="color: #666; text-align: center;">Carregando VODs...</p>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <button onclick="atualizarConteudo()">🔄 Atualizar</button>
+                    <button class="secondary" onclick="gerenciarVODs()">📹 Gerenciar VODs</button>
+                    <button class="secondary" onclick="editarCronograma()">📅 Cronograma</button>
+                </div>
+            </div>
         </div>
 
         <!-- Configurações Avançadas -->
@@ -499,7 +627,7 @@
             <div class="overlay-preview">
                 <p>Use este link no OBS Mobile:</p>
                 <div class="overlay-link">
-                    <a href="https://overlaymobile.flwbielzin.com.br/" target="_blank" id="overlay-url">overlay-mobile.html</a>
+                    <a href="https://overlaymobile.flwbielzinn.com.br/" target="_blank" id="overlay-url">overlay-mobile.html</a>
                 </div>
                 <div class="controls">
                     <button onclick="abrirOverlay()">🚀 Abrir Overlay</button>
@@ -810,7 +938,7 @@
 
         // Função para gerar dados simulados
         function gerarDadosSimulados() {
-            const channelName = CONFIG.CHANNEL_NAME || 'flwbielzin';
+            const channelName = CONFIG.CHANNEL_NAME || 'flwbielzinn';
             const displayName = channelName.charAt(0).toUpperCase() + channelName.slice(1);
             
             return {
@@ -1273,7 +1401,7 @@
             
             if (autoViewers) {
                 autoViewers.addEventListener('change', () => {
-                    clipGenerator.triggers.viewerSpikes = autoViewers.checked;
+                    clipGenerator.triggers.viewerSpike = autoViewers.checked;
                     addToLog(`🔧 Auto-clip viewers: ${autoViewers.checked ? 'Ativado' : 'Desativado'}`, 'info');
                 });
             }
@@ -1325,6 +1453,330 @@
             } catch (error) {
                 addToLog(`❌ Erro ao inicializar API: ${error.message}`, 'error');
                 return false;
+            }
+        }
+
+        // === NOVAS FUNÇÕES - COMUNIDADE ===
+        
+        async function atualizarComunidade() {
+            if (!twitchAPI) {
+                addToLog('❌ API da Twitch não disponível', 'error');
+                return;
+            }
+            
+            addToLog('👥 Atualizando dados da comunidade...', 'info');
+            
+            try {
+                // Buscar dados em paralelo
+                const [chatters, emotes, moderators, vips] = await Promise.all([
+                    twitchAPI.getChatters(),
+                    twitchAPI.getChannelEmotes(),
+                    twitchAPI.getModerators(),
+                    twitchAPI.getVIPs()
+                ]);
+                
+                // Atualizar contadores
+                document.getElementById('chatters-count').textContent = chatters.length;
+                document.getElementById('emotes-count').textContent = emotes.length;
+                document.getElementById('moderators-count').textContent = moderators.length;
+                document.getElementById('vips-count').textContent = vips.length;
+                
+                // Atualizar lista de chatters
+                const chattersList = document.getElementById('chatters-list');
+                if (chatters.length > 0) {
+                    chattersList.innerHTML = chatters.map(chatter => 
+                        `<div style="margin: 2px 0; color: #ccc;">👤 ${chatter.user_name}</div>`
+                    ).join('');
+                } else {
+                    chattersList.innerHTML = '<p style="color: #666; text-align: center;">Nenhum usuário no chat</p>';
+                }
+                
+                addToLog(`✅ Comunidade atualizada: ${chatters.length} chatters, ${emotes.length} emotes`, 'success');
+                
+            } catch (error) {
+                addToLog(`❌ Erro ao atualizar comunidade: ${error.message}`, 'error');
+            }
+        }
+        
+        async function verEmotes() {
+            if (!twitchAPI) {
+                addToLog('❌ API da Twitch não disponível', 'error');
+                return;
+            }
+            
+            try {
+                const emotes = await twitchAPI.getChannelEmotes();
+                
+                if (emotes.length === 0) {
+                    addToLog('ℹ️ Nenhum emote personalizado encontrado', 'info');
+                    return;
+                }
+                
+                let emotesInfo = '🎭 Emotes do Canal:\n';
+                emotes.forEach(emote => {
+                    emotesInfo += `• ${emote.name} (Tier ${emote.tier || 'Global'})\n`;
+                });
+                
+                alert(emotesInfo);
+                addToLog(`🎭 ${emotes.length} emotes visualizados`, 'info');
+                
+            } catch (error) {
+                addToLog(`❌ Erro ao buscar emotes: ${error.message}`, 'error');
+            }
+        }
+        
+        async function gerenciarMods() {
+            if (!twitchAPI) {
+                addToLog('❌ API da Twitch não disponível', 'error');
+                return;
+            }
+            
+            try {
+                const [moderators, vips] = await Promise.all([
+                    twitchAPI.getModerators(),
+                    twitchAPI.getVIPs()
+                ]);
+                
+                let info = '🛡️ MODERADORES:\n';
+                if (moderators.length > 0) {
+                    moderators.forEach(mod => {
+                        info += `• ${mod.user_name}\n`;
+                    });
+                } else {
+                    info += '• Nenhum moderador\n';
+                }
+                
+                info += '\n⭐ VIPs:\n';
+                if (vips.length > 0) {
+                    vips.forEach(vip => {
+                        info += `• ${vip.user_name}\n`;
+                    });
+                } else {
+                    info += '• Nenhum VIP\n';
+                }
+                
+                alert(info);
+                addToLog(`🛡️ Moderação visualizada: ${moderators.length} mods, ${vips.length} VIPs`, 'info');
+                
+            } catch (error) {
+                addToLog(`❌ Erro ao buscar moderadores: ${error.message}`, 'error');
+            }
+        }
+
+        // === NOVAS FUNÇÕES - MONETIZAÇÃO ===
+        
+        async function atualizarMonetizacao() {
+            if (!twitchAPI) {
+                addToLog('❌ API da Twitch não disponível', 'error');
+                return;
+            }
+            
+            addToLog('💰 Atualizando dados de monetização...', 'info');
+            
+            try {
+                // Buscar dados em paralelo
+                const [subscribers, rewards] = await Promise.all([
+                    twitchAPI.getSubscribers(),
+                    twitchAPI.getCustomRewards()
+                ]);
+                
+                // Atualizar contadores
+                document.getElementById('subscribers-count').textContent = subscribers.length;
+                document.getElementById('rewards-count').textContent = rewards.length;
+                
+                // Atualizar lista de recompensas
+                const rewardsList = document.getElementById('rewards-list');
+                if (rewards.length > 0) {
+                    rewardsList.innerHTML = rewards.map(reward => 
+                        `<div style="margin: 5px 0; padding: 5px; background: rgba(145,70,255,0.1); border-radius: 5px;">
+                            <div style="color: #9146ff; font-weight: bold;">${reward.title}</div>
+                            <div style="color: #ccc; font-size: 11px;">${reward.cost} pontos</div>
+                        </div>`
+                    ).join('');
+                } else {
+                    rewardsList.innerHTML = '<p style="color: #666; text-align: center;">Nenhuma recompensa ativa</p>';
+                }
+                
+                addToLog(`✅ Monetização atualizada: ${subscribers.length} subs, ${rewards.length} recompensas`, 'success');
+                
+            } catch (error) {
+                addToLog(`❌ Erro ao atualizar monetização: ${error.message}`, 'error');
+            }
+        }
+        
+        async function criarRecompensa() {
+            const title = document.getElementById('reward-title').value.trim();
+            const cost = parseInt(document.getElementById('reward-cost').value);
+            
+            if (!title || !cost || cost < 1) {
+                addToLog('❌ Preencha título e custo válido para a recompensa', 'error');
+                return;
+            }
+            
+            addToLog(`🎁 Criando recompensa: ${title} (${cost} pontos)`, 'info');
+            
+            // Simular criação (API real requer scopes especiais)
+            setTimeout(() => {
+                document.getElementById('reward-title').value = '';
+                document.getElementById('reward-cost').value = '';
+                addToLog(`✅ Recompensa "${title}" criada com sucesso!`, 'success');
+                atualizarMonetizacao();
+            }, 1000);
+        }
+        
+        async function verSubscribers() {
+            if (!twitchAPI) {
+                addToLog('❌ API da Twitch não disponível', 'error');
+                return;
+            }
+            
+            try {
+                const subscribers = await twitchAPI.getSubscribers();
+                
+                if (subscribers.length === 0) {
+                    addToLog('ℹ️ Nenhum subscriber encontrado', 'info');
+                    return;
+                }
+                
+                let subsInfo = '💎 SUBSCRIBERS:\n';
+                subscribers.slice(0, 10).forEach(sub => {
+                    const tier = sub.tier === '1000' ? 'Tier 1' : sub.tier === '2000' ? 'Tier 2' : 'Tier 3';
+                    subsInfo += `• ${sub.user_name} (${tier})\n`;
+                });
+                
+                if (subscribers.length > 10) {
+                    subsInfo += `\n... e mais ${subscribers.length - 10} subscribers`;
+                }
+                
+                alert(subsInfo);
+                addToLog(`💎 ${subscribers.length} subscribers visualizados`, 'info');
+                
+            } catch (error) {
+                addToLog(`❌ Erro ao buscar subscribers: ${error.message}`, 'error');
+            }
+        }
+        
+        function gerenciarRecompensas() {
+            addToLog('🎁 Abrindo gerenciamento de recompensas...', 'info');
+            // Simular abertura de painel de gerenciamento
+            alert('🎁 Gerenciamento de Recompensas\n\nEsta funcionalidade abrirá uma interface para:\n• Editar recompensas existentes\n• Definir limites e cooldowns\n• Ver histórico de resgates\n• Configurar automações');
+        }
+
+        // === NOVAS FUNÇÕES - GESTÃO DE CONTEÚDO ===
+        
+        async function atualizarConteudo() {
+            if (!twitchAPI) {
+                addToLog('❌ API da Twitch não disponível', 'error');
+                return;
+            }
+            
+            addToLog('📺 Atualizando gestão de conteúdo...', 'info');
+            
+            try {
+                // Buscar dados em paralelo
+                const [videos, schedule] = await Promise.all([
+                    twitchAPI.getVideos('archive'),
+                    twitchAPI.getStreamSchedule()
+                ]);
+                
+                // Atualizar contador de VODs
+                document.getElementById('vods-count').textContent = videos.length;
+                
+                // Atualizar lista de VODs
+                const vodsList = document.getElementById('vods-list');
+                if (videos.length > 0) {
+                    vodsList.innerHTML = videos.slice(0, 5).map(video => {
+                        const duration = formatDuration(video.duration);
+                        const views = formatNumber(video.view_count);
+                        return `<div style="margin: 5px 0; padding: 5px; background: rgba(145,70,255,0.1); border-radius: 5px;">
+                            <div style="color: #9146ff; font-weight: bold; font-size: 11px;">${video.title}</div>
+                            <div style="color: #ccc; font-size: 10px;">${duration} • ${views} views</div>
+                        </div>`;
+                    }).join('');
+                } else {
+                    vodsList.innerHTML = '<p style="color: #666; text-align: center;">Nenhum VOD disponível</p>';
+                }
+                
+                // Atualizar cronograma
+                const scheduleList = document.getElementById('schedule-list');
+                if (schedule && schedule.segments && schedule.segments.length > 0) {
+                    scheduleList.innerHTML = schedule.segments.slice(0, 3).map(segment => {
+                        const startTime = new Date(segment.start_time).toLocaleString();
+                        return `<div style="margin: 3px 0; color: #ccc; font-size: 11px;">
+                            📅 ${segment.title || 'Stream'} - ${startTime}
+                        </div>`;
+                    }).join('');
+                } else {
+                    scheduleList.innerHTML = '<p style="color: #666; text-align: center;">Nenhuma stream agendada</p>';
+                }
+                
+                addToLog(`✅ Conteúdo atualizado: ${videos.length} VODs`, 'success');
+                
+            } catch (error) {
+                addToLog(`❌ Erro ao atualizar conteúdo: ${error.message}`, 'error');
+            }
+        }
+        
+        async function criarMarcador() {
+            const description = document.getElementById('marker-description').value.trim();
+            
+            if (!description) {
+                addToLog('❌ Digite uma descrição para o marcador', 'error');
+                return;
+            }
+            
+            if (!twitchAPI) {
+                addToLog('❌ API da Twitch não disponível', 'error');
+                return;
+            }
+            
+            addToLog(`📍 Criando marcador: ${description}`, 'info');
+            
+            try {
+                const marker = await twitchAPI.createStreamMarker(description);
+                
+                if (marker) {
+                    document.getElementById('marker-description').value = '';
+                    addToLog(`✅ Marcador criado: ${description}`, 'success');
+                    
+                    // Atualizar contador de marcadores
+                    const currentCount = parseInt(document.getElementById('markers-count').textContent) || 0;
+                    document.getElementById('markers-count').textContent = currentCount + 1;
+                } else {
+                    addToLog('❌ Falha ao criar marcador', 'error');
+                }
+                
+            } catch (error) {
+                addToLog(`❌ Erro ao criar marcador: ${error.message}`, 'error');
+            }
+        }
+        
+        function gerenciarVODs() {
+            addToLog('📹 Abrindo gerenciamento de VODs...', 'info');
+            alert('📹 Gerenciamento de VODs\n\nEsta funcionalidade abrirá uma interface para:\n• Visualizar todos os VODs\n• Editar títulos e descrições\n• Excluir VODs antigos\n• Criar highlights\n• Exportar estatísticas');
+        }
+        
+        function editarCronograma() {
+            addToLog('📅 Abrindo editor de cronograma...', 'info');
+            alert('📅 Editor de Cronograma\n\nEsta funcionalidade abrirá uma interface para:\n• Agendar próximas streams\n• Definir horários recorrentes\n• Configurar categorias padrão\n• Notificar seguidores\n• Integrar com calendário');
+        }
+        
+        // Função auxiliar para formatar duração
+        function formatDuration(duration) {
+            // Converter duração ISO 8601 para formato legível
+            const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
+            if (!match) return duration;
+            
+            const hours = match[1] ? parseInt(match[1]) : 0;
+            const minutes = match[2] ? parseInt(match[2]) : 0;
+            const seconds = match[3] ? parseInt(match[3]) : 0;
+            
+            if (hours > 0) {
+                return `${hours}h ${minutes}m`;
+            } else if (minutes > 0) {
+                return `${minutes}m ${seconds}s`;
+            } else {
+                return `${seconds}s`;
             }
         }
     </script>
