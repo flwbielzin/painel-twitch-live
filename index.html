@@ -301,6 +301,62 @@
                 </div>
             </div>
 
+            <!-- Controle da Meta de Seguidores -->
+            <div class="card">
+                <h3>🎯 Meta de Seguidores Mobile</h3>
+                
+                <!-- Status Atual da Meta -->
+                <div class="metric">
+                    <span class="metric-label">📊 Meta Atual</span>
+                    <span class="metric-value" id="current-goal-display">1,247 / 1,500</span>
+                </div>
+                
+                <div class="metric">
+                    <span class="metric-label">📈 Progresso</span>
+                    <span class="metric-value" id="goal-progress-display">83.1%</span>
+                </div>
+                
+                <div class="metric">
+                    <span class="metric-label">🎯 Faltam</span>
+                    <span class="metric-value" id="goal-remaining-display">253 seguidores</span>
+                </div>
+                
+                <!-- Controles para Editar Meta -->
+                <div class="input-group">
+                    <label>👥 Seguidores Atuais</label>
+                    <input type="number" id="current-followers-input" placeholder="1247" min="0">
+                </div>
+                
+                <div class="input-group">
+                    <label>🎯 Nova Meta de Seguidores</label>
+                    <input type="number" id="target-followers-input" placeholder="1500" min="1">
+                </div>
+                
+                <div class="controls">
+                    <button onclick="atualizarMetaSeguidores()">🎯 Atualizar Meta</button>
+                    <button class="secondary" onclick="simularNovoSeguidor()">🎉 Simular Seguidor</button>
+                    <button class="secondary" onclick="resetarMeta()">🔄 Reset Meta</button>
+                </div>
+                
+                <!-- Preview da Meta -->
+                <div style="margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px;">
+                    <h5 style="color: #9146ff; margin-bottom: 10px;">📱 Preview Mobile:</h5>
+                    <div style="font-size: 12px; color: #ccc;">
+                        <p>✅ As alterações serão aplicadas automaticamente no overlay mobile</p>
+                        <p>✅ Notificações de novos seguidores aparecerão em tempo real</p>
+                        <p>✅ Barra de progresso será atualizada instantaneamente</p>
+                    </div>
+                </div>
+                
+                <!-- Histórico de Alterações -->
+                <div style="margin-top: 15px;">
+                    <h5 style="color: #9146ff; margin-bottom: 10px;">📋 Últimas Alterações:</h5>
+                    <div id="goal-history" style="max-height: 100px; overflow-y: auto; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px; font-size: 12px;">
+                        <p style="color: #666; text-align: center;">Nenhuma alteração ainda</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Controles da Stream -->
             <div class="card">
                 <h3>🎛️ Controles da Stream</h3>
@@ -781,6 +837,9 @@
             
             // Iniciar contador de uptime
             iniciarUptimeCounter();
+            
+            // Inicializar controle da meta de seguidores
+            inicializarControleMeta();
             
             addToLog('✅ Painel inicializado com sucesso!', 'success');
         }
@@ -1779,6 +1838,244 @@
                 return `${seconds}s`;
             }
         }
+
+        // === FUNÇÕES DE CONTROLE DA META DE SEGUIDORES ===
+        
+        // Variáveis globais para meta de seguidores
+        let followersGoalData = {
+            current: 1247,
+            target: 1500,
+            history: []
+        };
+
+        // Inicializar controles da meta
+        function inicializarControleMeta() {
+            // Carregar dados salvos
+            const savedGoal = localStorage.getItem('followersGoalData');
+            if (savedGoal) {
+                followersGoalData = JSON.parse(savedGoal);
+            }
+            
+            // Atualizar interface
+            atualizarDisplayMeta();
+            
+            // Preencher inputs com valores atuais
+            document.getElementById('current-followers-input').value = followersGoalData.current;
+            document.getElementById('target-followers-input').value = followersGoalData.target;
+            
+            addToLog(`🎯 Controle de meta inicializado: ${followersGoalData.current}/${followersGoalData.target}`, 'info');
+        }
+
+        // Atualizar meta de seguidores
+        function atualizarMetaSeguidores() {
+            const currentInput = document.getElementById('current-followers-input');
+            const targetInput = document.getElementById('target-followers-input');
+            
+            const newCurrent = parseInt(currentInput.value);
+            const newTarget = parseInt(targetInput.value);
+            
+            // Validações
+            if (isNaN(newCurrent) || newCurrent < 0) {
+                addToLog('❌ Digite um número válido para seguidores atuais', 'error');
+                return;
+            }
+            
+            if (isNaN(newTarget) || newTarget < 1) {
+                addToLog('❌ Digite um número válido para a meta', 'error');
+                return;
+            }
+            
+            if (newTarget <= newCurrent) {
+                addToLog('❌ A meta deve ser maior que os seguidores atuais', 'error');
+                return;
+            }
+            
+            // Salvar valores anteriores para histórico
+            const oldCurrent = followersGoalData.current;
+            const oldTarget = followersGoalData.target;
+            
+            // Atualizar dados
+            followersGoalData.current = newCurrent;
+            followersGoalData.target = newTarget;
+            
+            // Adicionar ao histórico
+            const timestamp = new Date().toLocaleTimeString();
+            followersGoalData.history.unshift({
+                timestamp,
+                action: 'Meta atualizada',
+                from: `${oldCurrent}/${oldTarget}`,
+                to: `${newCurrent}/${newTarget}`
+            });
+            
+            // Manter apenas últimas 10 alterações
+            if (followersGoalData.history.length > 10) {
+                followersGoalData.history = followersGoalData.history.slice(0, 10);
+            }
+            
+            // Salvar no localStorage
+            localStorage.setItem('followersGoalData', JSON.stringify(followersGoalData));
+            
+            // Atualizar interface
+            atualizarDisplayMeta();
+            atualizarHistoricoMeta();
+            
+            // Enviar para overlay mobile (se estiver aberto)
+            enviarMetaParaOverlay();
+            
+            addToLog(`🎯 Meta atualizada: ${newCurrent}/${newTarget}`, 'success');
+        }
+
+        // Simular novo seguidor
+        function simularNovoSeguidor() {
+            const nomesSugeridos = [
+                'ViewerBR123', 'GamerLive', 'StreamFan', 'TwitchLover', 'ChatMaster',
+                'LiveViewer', 'FollowBot', 'BrazilGamer', 'StreamStar', 'ViewerPro'
+            ];
+            
+            const nomeAleatorio = nomesSugeridos[Math.floor(Math.random() * nomesSugeridos.length)];
+            const nome = prompt('Nome do novo seguidor:', nomeAleatorio);
+            
+            if (nome) {
+                // Incrementar contador
+                followersGoalData.current++;
+                
+                // Adicionar ao histórico
+                const timestamp = new Date().toLocaleTimeString();
+                followersGoalData.history.unshift({
+                    timestamp,
+                    action: 'Novo seguidor',
+                    follower: nome,
+                    total: followersGoalData.current
+                });
+                
+                // Manter apenas últimas 10 alterações
+                if (followersGoalData.history.length > 10) {
+                    followersGoalData.history = followersGoalData.history.slice(0, 10);
+                }
+                
+                // Salvar no localStorage
+                localStorage.setItem('followersGoalData', JSON.stringify(followersGoalData));
+                
+                // Atualizar interface
+                atualizarDisplayMeta();
+                atualizarHistoricoMeta();
+                
+                // Atualizar input
+                document.getElementById('current-followers-input').value = followersGoalData.current;
+                
+                // Enviar para overlay mobile
+                enviarNovoSeguidorParaOverlay(nome);
+                
+                addToLog(`🎉 Novo seguidor simulado: ${nome} (Total: ${followersGoalData.current})`, 'success');
+            }
+        }
+
+        // Resetar meta para valores padrão
+        function resetarMeta() {
+            if (confirm('Tem certeza que deseja resetar a meta para os valores padrão?')) {
+                followersGoalData = {
+                    current: 1247,
+                    target: 1500,
+                    history: [{
+                        timestamp: new Date().toLocaleTimeString(),
+                        action: 'Meta resetada',
+                        to: '1247/1500'
+                    }]
+                };
+                
+                // Salvar no localStorage
+                localStorage.setItem('followersGoalData', JSON.stringify(followersGoalData));
+                
+                // Atualizar interface
+                atualizarDisplayMeta();
+                atualizarHistoricoMeta();
+                
+                // Atualizar inputs
+                document.getElementById('current-followers-input').value = followersGoalData.current;
+                document.getElementById('target-followers-input').value = followersGoalData.target;
+                
+                // Enviar para overlay mobile
+                enviarMetaParaOverlay();
+                
+                addToLog('🔄 Meta resetada para valores padrão', 'info');
+            }
+        }
+
+        // Atualizar display da meta no painel
+        function atualizarDisplayMeta() {
+            const current = followersGoalData.current;
+            const target = followersGoalData.target;
+            const progress = (current / target) * 100;
+            const remaining = target - current;
+            
+            // Atualizar elementos
+            document.getElementById('current-goal-display').textContent = `${formatNumber(current)} / ${formatNumber(target)}`;
+            document.getElementById('goal-progress-display').textContent = `${progress.toFixed(1)}%`;
+            
+            if (remaining <= 0) {
+                document.getElementById('goal-remaining-display').textContent = '🎉 Meta alcançada!';
+                document.getElementById('goal-remaining-display').style.color = '#00ff88';
+            } else {
+                document.getElementById('goal-remaining-display').textContent = `${formatNumber(remaining)} seguidores`;
+                document.getElementById('goal-remaining-display').style.color = '#ff6b6b';
+            }
+        }
+
+        // Atualizar histórico de alterações
+        function atualizarHistoricoMeta() {
+            const historyContainer = document.getElementById('goal-history');
+            
+            if (followersGoalData.history.length === 0) {
+                historyContainer.innerHTML = '<p style="color: #666; text-align: center;">Nenhuma alteração ainda</p>';
+                return;
+            }
+            
+            historyContainer.innerHTML = followersGoalData.history.map(entry => {
+                let content = `<div style="margin: 3px 0; padding: 5px; background: rgba(145,70,255,0.1); border-radius: 5px;">`;
+                content += `<div style="color: #9146ff; font-weight: bold; font-size: 11px;">[${entry.timestamp}] ${entry.action}</div>`;
+                
+                if (entry.follower) {
+                    content += `<div style="color: #00ff88; font-size: 10px;">👤 ${entry.follower} (Total: ${entry.total})</div>`;
+                } else if (entry.from && entry.to) {
+                    content += `<div style="color: #ccc; font-size: 10px;">${entry.from} → ${entry.to}</div>`;
+                } else if (entry.to) {
+                    content += `<div style="color: #ccc; font-size: 10px;">${entry.to}</div>`;
+                }
+                
+                content += '</div>';
+                return content;
+            }).join('');
+        }
+
+        // Enviar meta atualizada para overlay mobile
+        function enviarMetaParaOverlay() {
+            try {
+                // Tentar comunicar com overlay mobile se estiver aberto
+                const overlayWindow = window.open('', 'overlay-mobile');
+                if (overlayWindow && overlayWindow.updateFollowersGoal) {
+                    overlayWindow.updateFollowersGoal(followersGoalData.current, followersGoalData.target);
+                    addToLog('📱 Meta enviada para overlay mobile', 'success');
+                }
+            } catch (error) {
+                // Silencioso - overlay pode não estar aberto
+            }
+        }
+
+        // Enviar novo seguidor para overlay mobile
+        function enviarNovoSeguidorParaOverlay(nome) {
+            try {
+                // Tentar comunicar com overlay mobile se estiver aberto
+                const overlayWindow = window.open('', 'overlay-mobile');
+                if (overlayWindow && overlayWindow.triggerNewFollower) {
+                    overlayWindow.triggerNewFollower(nome);
+                    addToLog(`📱 Novo seguidor "${nome}" enviado para overlay mobile`, 'success');
+                }
+            } catch (error) {
+                // Silencioso - overlay pode não estar aberto
+            }
+        }
+
+        // === FIM DAS FUNÇÕES DE CONTROLE DA META ===
     </script>
 </body>
 </html> 

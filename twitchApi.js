@@ -86,7 +86,7 @@ class TwitchAPI {
                 } else if (response.status === 429) {
                     throw new Error('Rate limit excedido');
                 } else {
-                    throw new Error(`Erro HTTP: ${response.status} - ${errorText}`);
+                throw new Error(`Erro HTTP: ${response.status} - ${errorText}`);
                 }
             }
 
